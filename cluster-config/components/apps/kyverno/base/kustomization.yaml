@@ -1,0 +1,40 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- namespace.yaml
+- deploy.yaml
+- require-requests-limits-policy.yaml
+
+patches:
+- patch: |-
+    - op: replace
+      path: /spec/template/spec/containers/0/resources/limits/memory
+      value: 768Mi
+    - op: add
+      path: /spec/template/spec/containers/0/args/-
+      value: '--clientRateLimitQPS=350'
+    - op: add
+      path: /spec/template/spec/containers/0/args/-
+      value: '--clientRateLimitBurst=350'
+    - op: remove
+      path: /spec/template/spec/containers/0/securityContext
+    - op: remove
+      path: /spec/template/spec/initContainers/0/securityContext
+  target:
+    kind: Deployment
+    name: kyverno
+- patch: |-
+    - op: replace
+      path: /data/resourceFilters
+      value: '[*,kyverno,*][Event,*,*][*,kube-system,*][*,kube-public,*][*,kube-node-lease,*][Node,*,*][APIService,*,*][TokenReview,*,*][SubjectAccessReview,*,*][SelfSubjectAccessReview,*,*][*,kyverno,kyverno*][*,openshift,*][*,sealed-secrets,*][*,openshift-*,*][*,open-cluster-*,*][Binding,*,*][ReplicaSet,*,*][ReportChangeRequest,*,*][ClusterReportChangeRequest,*,*][PolicyReport,*,*][ClusterPolicyReport,*,*]'
+  target:
+    kind: ConfigMap
+    name: kyverno
+- patch: |- 
+    - op: replace
+      path: /apiVersion
+      value: 'policy/v1'
+  target:
+    kind: PodDisruptionBudget
+    name: kyverno
