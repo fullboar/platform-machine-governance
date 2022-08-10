@@ -26,9 +26,9 @@ spec:
         - Pod
     preconditions:
       any:
-      - key: "{{ request.object.metadata.namespace || '' }}"
+      - key: "{{ regex_match('^[a-zA-Z0-9]{6,6}-(dev|test|prod|tools)$', '{{request.object.metadata.namespace || ''}}') }}"
         operator: Equals
-        value: regex_match('^[1-7]$',`1`)
+        value: true
     validate:
       message: "CPU and memory resource requests and limits are required."
       pattern:
