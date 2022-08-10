@@ -6,6 +6,7 @@ ARG VENV_PATH="/home/vscode/venv"
 ENV KUBESEAL_VERSION=v0.18.1
 ENV KUSTOMIZE_VERSION=v4.5.6
 ENV KYVERNO_VERSION=v1.7.2
+ENV HELM_VERSION=v3.9.2
 
 RUN apt-get update && \
     apt-get -y upgrade
@@ -25,13 +26,15 @@ RUN curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/s
     sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl && \
     rm -f kubectl kubectl.sha256
 
-RUN curl -L https://github.com/kyverno/kyverno/releases/download/${KYVERNO_VERSION}/kyverno-cli_${KYVERNO_VERSION}_linux_arm64.tar.gz| \
-    tar -xz -C /tmp && \
-    sudo install -o root -g root -m 0755 /tmp/kyverno /usr/local/bin/kyverno && \
-    rm -f /tmp/kyverno
+RUN mkdir -p /tmp/kyverno-tmp && \
+    curl -L https://github.com/kyverno/kyverno/releases/download/${KYVERNO_VERSION}/kyverno-cli_${KYVERNO_VERSION}_linux_arm64.tar.gz| \
+    tar -xz -C /tmp/kyverno-tmp && \
+    sudo install -o root -g root -m 0755 /tmp/kyverno-tmp/kyverno /usr/local/bin/kyverno && \
+    rm -f /tmp/kyverno-tmp
 
 RUN curl -LOJ https://github.com/bitnami-labs/sealed-secrets/releases/download/${KUBESEAL_VERSION}/kubeseal-linux-arm64 && \
-    sudo install -o root -g root -m 0755 kubeseal-linux-arm64 /usr/local/bin/kubeseal
+    sudo install -o root -g root -m 0755 kubeseal-linux-arm64 /usr/local/bin/kubeseal && \
+    rm -f kubeseal-linux-arm64
 
 RUN curl -L https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2F${KUSTOMIZE_VERSION}/kustomize_${KUSTOMIZE_VERSION}_linux_arm64.tar.gz| \
     tar -xz -C /tmp && \
@@ -41,6 +44,12 @@ RUN curl -L https://github.com/kubernetes-sigs/kustomize/releases/download/kusto
 RUN tar -zxf /tmp/oc-49-linux-arm64.tar.gz -C /tmp && \
     sudo install -o root -g root -m 0755 /tmp/oc /usr/local/bin/oc && \
     rm -rf /tmp/oc README.md
+
+RUN mkdir -p /tmp/helm-tmp && \
+    curl -L https://get.helm.sh/helm-${HELM_VERSION}-linux-arm64.tar.gz| \
+    tar -xz -C /tmp/helm-tmp && \
+    sudo install -o root -g root -m 0755 /tmp/helm-tmp/linux-arm64/helm /usr/local/bin/helm && \
+    rm -rf /tmp/helm-tmp
 
 # FROM jupyter/minimal-notebook:aarch64-ubuntu-22.04
 
