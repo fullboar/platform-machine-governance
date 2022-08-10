@@ -11,7 +11,7 @@ RUN apt-get update && \
     apt-get -y upgrade
 
 # COPY requirements.txt /tmp/pip-tmp/
-# COPY oc-49-linux-arm64.tar.gz /tmp
+COPY oc-49-linux-arm64.tar.gz /tmp
 
 # RUN pip3 --disable-pip-version-check \
 #    --no-cache-dir install -r /tmp/pip-tmp/requirements.txt && \
@@ -32,13 +32,13 @@ RUN curl -LOJ https://github.com/bitnami-labs/sealed-secrets/releases/download/$
     sudo install -o root -g root -m 0755 kubeseal-linux-arm64 /usr/local/bin/kubeseal
 
 RUN curl -L https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2F${KUSTOMIZE_VERSION}/kustomize_${KUSTOMIZE_VERSION}_linux_arm64.tar.gz| \
-  tar -xz -C /tmp && \
-  sudo install -o root -g root -m 0755 /tmp/kustomize /usr/local/bin/kustomize && \
-  rm -f /tmp/kustomize*.tar.gz /tmp/kustomize
+    tar -xz -C /tmp && \
+    sudo install -o root -g root -m 0755 /tmp/kustomize /usr/local/bin/kustomize && \
+    rm -f /tmp/kustomize*.tar.gz /tmp/kustomize
 
-# RUN tar -zxf /tmp/oc-49-linux-arm64.tar.gz -C /tmp && \
-#     sudo install -o root -g root -m 0755 /tmp/oc /usr/local/bin/oc && \
-#     rm -rf /tmp/oc
+RUN tar -zxf /tmp/oc-49-linux-arm64.tar.gz -C /tmp && \
+    sudo install -o root -g root -m 0755 /tmp/oc /usr/local/bin/oc && \
+    rm -rf /tmp/oc README.md
 
 # FROM jupyter/minimal-notebook:aarch64-ubuntu-22.04
 
